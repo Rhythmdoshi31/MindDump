@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  dumps     Dump[]
+  reminders Reminder[]
+  image     String?
+  provider  String?
+  providerId String?
+  tags      Tag[]
+}
+
+model Dump {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  content   String
+  tagId     String
+  tags      Tag      @relation(fields: [tagId], references: [id])
+  isFav     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  dumpId    String
+  dump      Dump[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Time {
+  MORNING
+  NIGHT
+}
+
+model Reminder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  time      Time
+  isEnabled Boolean  @default(true)
+}
